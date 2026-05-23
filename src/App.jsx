@@ -199,7 +199,7 @@ function MainApp() {
       const res = await fetch("/api/chat", {
         method:"POST", headers:{ "Content-Type":"application/json" },
         body: JSON.stringify({
-          model:"claude-sonnet-4-20250514", max_tokens:1200, system:ag.sys,
+          model:"claude-haiku-4-5-20251001", max_tokens:1200, system:ag.sys,
           messages:next.map((m,i) => ({ role:m.role, content:i===next.length-1&&m.role==="user"?prefix+m.content:m.content }))
         })
       });
