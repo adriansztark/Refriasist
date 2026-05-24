@@ -68,7 +68,7 @@ Responde en español. Directo, práctico y educativo.`
 
 // ── Tracking ─────────────────────────────────────────────────────────────────
 const LS_KEY = "ra_events";
-function loadEvents() { try { return JSON.parse(localStorage.getItem(LS_KEY)||"[]"); } catch { return []; } }
+function loadEvents() { try { const all = JSON.parse(localStorage.getItem(LS_KEY)||"[]"); const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-30); return all.filter(e => new Date(e.ts) >= cutoff); } catch { return []; } }
 function saveEvent(ev) {
   try {
     const events = loadEvents();
