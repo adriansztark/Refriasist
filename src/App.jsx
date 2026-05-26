@@ -11,16 +11,16 @@ const GUSTAVO_COLOR = "#0369a1";
 const AGENTS = {
   karla: {
     name: "Karla", color: KARLA_COLOR, emoji: "🎧",
-    role: "Atención al Cliente · Buenos Aires Refrigeración",
-    welcome: `¡Hola! 👋 Soy tu asistente de atención al cliente de Buenos Aires Refrigeración.\n\nPuedo ayudarte a:\n💬 **Consultar** — Cuéntame la situación y te sugiero cómo responderle al cliente.\n🎯 **Practicar** — Te presento un caso real para que practiques.\n📝 **Evaluar** — Dime lo que respondiste y te doy retroalimentación.\n\n¿Con qué empezamos?`,
+    role: "Atención al Cliente · RefriAsist",
+    welcome: `¡Hola! 👋 Soy tu asistente de atención al cliente de RefriAsist.\n\nPuedo ayudarte a:\n💬 **Consultar** — Cuéntame la situación y te sugiero cómo responderle al cliente.\n🎯 **Practicar** — Te presento un caso real para que practiques.\n📝 **Evaluar** — Dime lo que respondiste y te doy retroalimentación.\n\n¿Con qué empezamos?`,
     cPrompts: ["Cliente pregunta precio de instalación","Cliente molesto por retraso del técnico","Cliente solo quiere saber el costo","Reclamo por garantía","Agendar mantenimiento"],
     pPrompts: ["Caso: cliente pide precio inmediato","Caso: cliente molesto con reclamo","Caso: preguntan disponibilidad urgente","Caso: cliente insiste en diagnóstico gratis","Caso: reprogramar visita"],
     bC: "💬 Consulta — Qué responder, cómo decirlo con calidez y por qué funciona",
     bP: "🎯 Práctica — Lee el caso y responde como lo harías con el cliente",
-    sys: `Eres un asistente educativo interno para Karla, representante de atención al cliente de Buenos Aires Refrigeración, empresa técnica especializada en aire acondicionado, refrigeración, mantenimiento, reparación, instalación, diagnóstico técnico, bombas de drenaje, proyectos especiales y sistemas VRF.
+    sys: `Eres un asistente educativo interno para Karla, representante de atención al cliente de RefriAsist, empresa técnica especializada en aire acondicionado, refrigeración, mantenimiento, reparación, instalación, diagnóstico técnico, bombas de drenaje, proyectos especiales y sistemas VRF.
 
 ## IDENTIDAD DE LA EMPRESA
-Buenos Aires Refrigeración NO se posiciona como "los más baratos" ni instaladores informales. Prioriza calidad, orden, diagnóstico correcto, comunicación clara y seguimiento.
+RefriAsist NO se posiciona como "los más baratos" ni instaladores informales. Prioriza calidad, orden, diagnóstico correcto, comunicación clara y seguimiento.
 
 La empresa NO realiza: aire acondicionado automotriz, trabajos eléctricos generales, trabajos improvisados sin evaluación, cotizaciones irresponsables.
 
@@ -45,7 +45,7 @@ SIEMPRE: saludar, responder con educación, escribir ordenado, hacer preguntas c
 NUNCA: inventar información, prometer horarios sin confirmar, discutir con clientes, culpar técnicos, hablar mal de competencia, garantizar algo técnicamente incierto, cotizar instalaciones complejas sin información suficiente.
 
 ## DATOS QUE DEBE PEDIR
-REPARACIÓN: ubicación, fotos, marca, tipo de equipo, qué falla presenta, si enfría, si gotea, si prende, si muestra error.
+REPARACIÓN: ubicación, fotos, marca, qué falla presenta, si enfría, si gotea, si prende, si muestra error.
 INSTALACIÓN: equipo nuevo o usado, capacidad, ubicación, fotos del lugar, si hay tuberías existentes, tipo de pared, altura, PH o casa, distancia aproximada.
 MANTENIMIENTO: cantidad de equipos, tipo, ubicación, última vez que recibió mantenimiento.
 
@@ -85,13 +85,13 @@ Responde en español. Nunca hagas sentir mal a Karla. El objetivo es construir r
   },
   gustavo: {
     name: "Gustavo", color: GUSTAVO_COLOR, emoji: "🗺️",
-    role: "Coordinación Operativa · Buenos Aires Refrigeración",
-    welcome: `¡Hola Gustavo! 👋 Soy tu asistente de coordinación operativa de Buenos Aires Refrigeración.\n\nPuedo ayudarte a:\n💬 **Consultar** — Cuéntame la situación y te ayudo a organizar rutas, priorizar y tomar decisiones operativas.\n🎯 **Practicar** — Te presento un escenario real para que practiques la coordinación.\n\n¿Con qué empezamos?`,
+    role: "Coordinación Operativa · RefriAsist",
+    welcome: `¡Hola Gustavo! 👋 Soy tu asistente de coordinación operativa de RefriAsist.\n\nPuedo ayudarte a:\n💬 **Consultar** — Cuéntame la situación y te ayudo a organizar rutas, priorizar y tomar decisiones operativas.\n🎯 **Practicar** — Te presento un escenario real para que practiques la coordinación.\n\n¿Con qué empezamos?`,
     cPrompts: ["Organizar ruta del día","Técnico con retraso en servicio","Dos urgencias al mismo tiempo","Detectar agenda saturada","Asignar trabajo a técnico correcto"],
     pPrompts: ["Caso: agenda imposible","Caso: emergencia comercial activa","Caso: técnico nuevo en trabajo complejo","Caso: materiales faltantes en ruta","Caso: PH con restricción horaria"],
     bC: "💬 Consulta — Análisis operativo + decisión + explicación",
     bP: "🎯 Práctica — Lee el escenario y decide cómo coordinar",
-    sys: `Eres un asistente educativo interno para Gustavo, coordinador operativo de Buenos Aires Refrigeración, empresa técnica especializada en aire acondicionado, refrigeración, mantenimiento, reparación, instalación, diagnóstico técnico, bombas de drenaje y sistemas VRF.
+    sys: `Eres un asistente educativo interno para Gustavo, coordinador operativo de RefriAsist, empresa técnica especializada en aire acondicionado, refrigeración, mantenimiento, reparación, instalación, diagnóstico técnico, bombas de drenaje y sistemas VRF.
 
 ## TU ROL
 Pensar como coordinador operativo, despachador técnico, supervisor logístico y analista de productividad. Tu objetivo es reducir caos operativo, minimizar tiempos muertos, evitar improvisación, optimizar recorridos y mejorar puntualidad.
@@ -209,7 +209,7 @@ function LoginScreen({ onLogin }) {
       <style>{css}</style>
       <div style={{ background:"#fff", borderRadius:24, padding:"44px 40px", width:"100%", maxWidth:420, boxShadow:"0 24px 64px rgba(14,165,233,0.13)", textAlign:"center" }}>
         <div style={{ fontSize:48, marginBottom:16 }}>❄️</div>
-        <div style={{ fontSize:22, fontWeight:800, color:"#0c4a6e", marginBottom:6 }}>Buenos Aires Refrigeración</div>
+        <div style={{ fontSize:22, fontWeight:800, color:"#0c4a6e", marginBottom:6 }}>RefriAsist</div>
         <div style={{ fontSize:13, color:"#64748b", marginBottom:32 }}>Asistente interno de operaciones</div>
         <input type="password" value={pass} onChange={e => setPass(e.target.value)}
           onKeyDown={e => e.key === "Enter" && submit()}
@@ -312,7 +312,7 @@ function MainApp() {
         <div style={{ display:"flex", alignItems:"center", gap:14, marginBottom:36 }}>
           <span style={{ fontSize:36 }}>❄️</span>
           <div>
-            <div style={{ fontSize:22, fontWeight:800, color:"#0c4a6e" }}>Buenos Aires Refrigeración</div>
+            <div style={{ fontSize:22, fontWeight:800, color:"#0c4a6e" }}>RefriAsist</div>
             <div style={{ fontSize:12, color:"#38bdf8", fontWeight:600 }}>Asistente interno de operaciones</div>
           </div>
         </div>
@@ -471,7 +471,7 @@ function AdminPanel() {
           <div style={{ display:"flex", alignItems:"center", gap:12 }}>
             <div style={{ width:44, height:44, borderRadius:12, background:"linear-gradient(135deg,#0ea5e9,#0369a1)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:20 }}>📊</div>
             <div>
-              <div style={{ fontSize:20, fontWeight:800, color:"#0c4a6e" }}>Panel Admin — Buenos Aires Refrigeración</div>
+              <div style={{ fontSize:20, fontWeight:800, color:"#0c4a6e" }}>Panel Admin — RefriAsist</div>
               <div style={{ fontSize:12, color:"#64748b" }}>Reporte de uso últimos 30 días · Solo visible para ti</div>
             </div>
           </div>
