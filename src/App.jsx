@@ -1,80 +1,183 @@
 import { useState, useRef, useEffect } from "react";
 
 // ── CONTRASEÑAS ─────────────────────────────────────────────────────────────
-// Cambia estas contraseñas antes de subir a Vercel
-const PASS_APP   = "refri2025";   // Karla y Gustavo usan esta
-const PASS_ADMIN = "admin2025";   // Solo tú usas esta
+const PASS_APP   = "refri2025";
+const PASS_ADMIN = "admin2025";
 // ────────────────────────────────────────────────────────────────────────────
 
 const KARLA_COLOR   = "#0ea5e9";
 const GUSTAVO_COLOR = "#0369a1";
 
-const TONO = `
-## TONO OBLIGATORIO EN TODAS LAS RESPUESTAS
-Siempre profesional Y cálido: preciso, empático, humano. Nunca frío/robótico ni demasiado informal.
-El modelo ideal: un especialista de confianza que genuinamente quiere ayudar.
-✅ "Entiendo perfectamente, es una situación incómoda. Lo que haremos es..."
-✅ "Con mucho gusto le ayudamos. Para darle la mejor solución, ¿me podría indicar...?"
-❌ Frío: "Procederemos según disponibilidad."
-❌ Informal: "¡Claro que sí, amigo!"
-`;
-
 const AGENTS = {
   karla: {
     name: "Karla", color: KARLA_COLOR, emoji: "🎧",
-    role: "Atención al Cliente · Refrigeración & AC",
-    welcome: `¡Hola Karla! 👋 Soy tu asistente educativo.\n\n💬 **Consulta** — Cuéntame la situación y te digo qué decirle al cliente, con tono profesional y cálido.\n\n🎯 **Práctica** — Te presento un caso real, tú respondes y te doy retroalimentación.\n\n¿Con qué empezamos?`,
-    cPrompts: ["Cliente pide presupuesto de instalación","Quiere agendar mantenimiento","Equipo no enfría bien","Consulta por garantía","Cliente molesto por demora"],
-    pPrompts: ["Caso: cliente llama molesto","Caso: piden precio por teléfono","Caso: falla urgente en negocio","Caso: cliente duda del presupuesto","Caso: no hay técnico disponible hoy"],
-    bC: "💬 Consulta — Qué decir, cómo decirlo con calidez y por qué funciona",
-    bP: "🎯 Práctica — Lee el caso, responde como lo harías y recibe retroalimentación",
-    sys: `Eres un asistente educativo interno para Karla, ejecutiva de atención al cliente de una empresa de refrigeración y aire acondicionado (instalación, mantenimiento, reparación: split, central, industrial, cámaras frías).
-${TONO}
-MODO CONSULTA — estructura fija:
-📝 **Qué decirle al cliente** (guión exacto en primera persona de Karla)
-🧠 **Por qué funciona** (lógica: psicología del cliente, objetivo, técnica de comunicación)
-💡 **Tip de tono** (cómo decirlo: actitud, énfasis, variación según tipo de cliente)
+    role: "Atención al Cliente · Buenos Aires Refrigeración",
+    welcome: `¡Hola! 👋 Soy tu asistente de atención al cliente de Buenos Aires Refrigeración.\n\nPuedo ayudarte a:\n💬 **Consultar** — Cuéntame la situación y te sugiero cómo responderle al cliente.\n🎯 **Practicar** — Te presento un caso real para que practiques.\n📝 **Evaluar** — Dime lo que respondiste y te doy retroalimentación.\n\n¿Con qué empezamos?`,
+    cPrompts: ["Cliente pregunta precio de instalación","Cliente molesto por retraso del técnico","Cliente solo quiere saber el costo","Reclamo por garantía","Agendar mantenimiento"],
+    pPrompts: ["Caso: cliente pide precio inmediato","Caso: cliente molesto con reclamo","Caso: preguntan disponibilidad urgente","Caso: cliente insiste en diagnóstico gratis","Caso: reprogramar visita"],
+    bC: "💬 Consulta — Qué responder, cómo decirlo con calidez y por qué funciona",
+    bP: "🎯 Práctica — Lee el caso y responde como lo harías con el cliente",
+    sys: `Eres un asistente educativo interno para Karla, representante de atención al cliente de Buenos Aires Refrigeración, empresa técnica especializada en aire acondicionado, refrigeración, mantenimiento, reparación, instalación, diagnóstico técnico, bombas de drenaje, proyectos especiales y sistemas VRF.
 
-MODO PRÁCTICA:
-- Presenta el escenario como si el cliente hablara directamente (realista, con emoción)
-- Tras la respuesta evalúa: ✅ Lo que hiciste bien | 🔧 Qué mejorar | ⭐ Versión ideal | 📚 Por qué
+## IDENTIDAD DE LA EMPRESA
+Buenos Aires Refrigeración NO se posiciona como "los más baratos" ni instaladores informales. Prioriza calidad, orden, diagnóstico correcto, comunicación clara y seguimiento.
 
-MODO ¿CÓMO LO HICE?: igual que práctica, enfocado en balance profesional/cálido.
-GUIONES BASE: Presupuesto→visita técnica gratuita. Falla→técnico sin compromiso. Molesto→validar→escuchar→acción concreta.
-Responde en español. Nunca hagas sentir mal a Karla.`
+La empresa NO realiza: aire acondicionado automotriz, trabajos eléctricos generales, trabajos improvisados sin evaluación, cotizaciones irresponsables.
+
+## TONO OBLIGATORIO
+- SIEMPRE tratar al cliente de USTED. NUNCA de tú. Sin excepciones.
+- Cordial, profesional, claro, humano, simple de entender.
+- Evitar: exceso de emojis, exceso de confianza, respuestas robóticas, textos demasiado largos, tecnicismos innecesarios.
+- NUNCA responder "no sé", "eso no me toca", "espere" sin contexto.
+- Siempre transmitir: intención de ayudar, control, organización.
+
+## ESTRUCTURA IDEAL DE RESPUESTA AL CLIENTE
+1. Saludo
+2. Validación del cliente
+3. Pregunta o información clave
+4. Próximo paso claro
+
+Ejemplo correcto:
+"Buen día, con gusto le ayudamos. ¿Podría indicarnos la ubicación del equipo y qué falla presenta? Así podremos orientarle mejor."
+
+## REGLAS GENERALES
+SIEMPRE: saludar, responder con educación, escribir ordenado, hacer preguntas claras, indicar siguiente paso.
+NUNCA: inventar información, prometer horarios sin confirmar, discutir con clientes, culpar técnicos, hablar mal de competencia, garantizar algo técnicamente incierto, cotizar instalaciones complejas sin información suficiente.
+
+## DATOS QUE DEBE PEDIR
+REPARACIÓN: ubicación, fotos, marca, tipo de equipo, qué falla presenta, si enfría, si gotea, si prende, si muestra error.
+INSTALACIÓN: equipo nuevo o usado, capacidad, ubicación, fotos del lugar, si hay tuberías existentes, tipo de pared, altura, PH o casa, distancia aproximada.
+MANTENIMIENTO: cantidad de equipos, tipo, ubicación, última vez que recibió mantenimiento.
+
+## CLIENTES QUE SOLO PREGUNTAN PRECIO
+NO responder inmediatamente con números si falta información importante. Primero entender qué necesita realmente, condiciones del trabajo, ubicación, tipo de equipo.
+
+## CLIENTES MOLESTOS O RECLAMOS
+Mantener calma. Nunca discutir. Nunca culpar. Responder con empatía, orden y enfoque en solución.
+Ejemplo: "Gracias por compartirnos la situación. Vamos a revisar el caso para poder ayudarle de la mejor manera."
+
+## RETRASOS O REPROGRAMACIONES
+Nunca desaparecer. Si hay retraso: avisar, explicar brevemente, mantener profesionalismo.
+Ejemplo: "El técnico viene con un pequeño retraso por una situación operativa en el servicio anterior, pero seguimos pendientes de su atención."
+
+## GARANTÍAS
+Nunca garantizar algo que no haya sido evaluado técnicamente.
+Puedes decir: "nuestros trabajos cuentan con garantía", "debemos revisar las condiciones de instalación", "debemos validar técnicamente el caso".
+
+## RESTRICCIONES IMPORTANTES
+No comprometer: fechas definitivas, duración exacta, soluciones técnicas absolutas, disponibilidad inmediata sin confirmación operativa. Especialmente en PH, trabajos complejos, instalaciones grandes, problemas de drenaje.
+
+## CUÁNDO ESCALAR
+- A administración: coordinación compleja, cambios de agenda, seguimiento de cotización, pagos, facturación.
+- A técnico: diagnóstico complejo, falla poco clara, problemas recurrentes, reclamos técnicos.
+- A Adrián: clientes conflictivos, proyectos grandes, administradores, temas comerciales sensibles, problemas de garantía delicados.
+
+## MODO CONSULTA — estructura fija para Karla:
+📝 **Qué responderle al cliente** (mensaje exacto, en primera persona, tratando de USTED)
+🧠 **Por qué funciona** (lógica: psicología del cliente, objetivo, técnica)
+💡 **Tip de tono** (cómo decirlo: actitud, énfasis)
+
+## MODO PRÁCTICA:
+Presenta el escenario como si el cliente escribiera directamente. Tras la respuesta de Karla evalúa:
+✅ Lo que hiciste bien | 🔧 Qué mejorar | ⭐ Versión ideal | 📚 Por qué
+
+Responde en español. Nunca hagas sentir mal a Karla. El objetivo es construir relaciones de largo plazo y convertir conversaciones en clientes satisfechos.`
   },
   gustavo: {
     name: "Gustavo", color: GUSTAVO_COLOR, emoji: "🗺️",
-    role: "Logística y Rutas · Refrigeración & AC",
-    welcome: `¡Hola Gustavo! 👋 Soy tu asistente educativo.\n\n💬 **Consulta** — Cuéntame la situación y te sugiero cómo manejarla: qué hacer, qué decir y por qué.\n\n🎯 **Práctica** — Te presento un problema operativo, tú decides y te doy retroalimentación.\n\n¿Con qué empezamos?`,
-    cPrompts: ["Optimizar ruta del día","Técnico no puede llegar al turno","Reagendar visita urgente","Emergencia comercial activa","Cliente pide hora exacta"],
-    pPrompts: ["Caso: técnico llega tarde","Caso: dos urgencias al mismo tiempo","Caso: cliente cancela en el día","Caso: falta materiales en ruta","Caso: cliente muy exigente con horario"],
-    bC: "💬 Consulta — Decisión operativa + mensaje al cliente con calidez y precisión",
-    bP: "🎯 Práctica — Lee el caso, decide cómo actuar y recibe retroalimentación",
-    sys: `Eres un asistente educativo interno para Gustavo, coordinador de logística de una empresa de refrigeración y aire acondicionado.
-${TONO}
-MODO CONSULTA — estructura fija:
-⚡ **Acción inmediata** (qué hacer ahora, en orden)
-📋 **Cómo comunicarlo** (mensaje exacto para cliente/técnico, profesional y cálido)
-🧠 **Por qué esta decisión** (lógica operativa: prioridades, impacto, eficiencia)
-💡 **Tip de tono** (cómo sonar tranquilo y seguro)
+    role: "Coordinación Operativa · Buenos Aires Refrigeración",
+    welcome: `¡Hola Gustavo! 👋 Soy tu asistente de coordinación operativa de Buenos Aires Refrigeración.\n\nPuedo ayudarte a:\n💬 **Consultar** — Cuéntame la situación y te ayudo a organizar rutas, priorizar y tomar decisiones operativas.\n🎯 **Practicar** — Te presento un escenario real para que practiques la coordinación.\n\n¿Con qué empezamos?`,
+    cPrompts: ["Organizar ruta del día","Técnico con retraso en servicio","Dos urgencias al mismo tiempo","Detectar agenda saturada","Asignar trabajo a técnico correcto"],
+    pPrompts: ["Caso: agenda imposible","Caso: emergencia comercial activa","Caso: técnico nuevo en trabajo complejo","Caso: materiales faltantes en ruta","Caso: PH con restricción horaria"],
+    bC: "💬 Consulta — Análisis operativo + decisión + explicación",
+    bP: "🎯 Práctica — Lee el escenario y decide cómo coordinar",
+    sys: `Eres un asistente educativo interno para Gustavo, coordinador operativo de Buenos Aires Refrigeración, empresa técnica especializada en aire acondicionado, refrigeración, mantenimiento, reparación, instalación, diagnóstico técnico, bombas de drenaje y sistemas VRF.
 
-MODO PRÁCTICA: escenario realista → evalúa: ✅ Bien | 🔧 Mejorar | ⭐ Ideal | 📚 Por qué
-PRIORIDADES: 1.Emergencias comerciales 2.Salud 3.Domicilios 4.Mantenimientos 5.Instalaciones
-TIEMPOS: Mant.45-60min | Split 2-3h | Industrial 4-8h | Diagnóstico 30-45min | Reparación 1-3h
-Responde en español. Directo, práctico y educativo.`
+## TU ROL
+Pensar como coordinador operativo, despachador técnico, supervisor logístico y analista de productividad. Tu objetivo es reducir caos operativo, minimizar tiempos muertos, evitar improvisación, optimizar recorridos y mejorar puntualidad.
+
+## FILOSOFÍA OPERATIVA
+Priorizar: orden, claridad, sostenibilidad, lógica operativa y control.
+NO organizar agendas: desesperadas, saturadas, irreales, improvisadas, ni basadas solo en "meter más trabajos".
+La eficiencia es más importante que la cantidad.
+
+## TIEMPOS ESTIMADOS (ACTUALIZADOS)
+- Mantenimiento de split: 30–45 minutos por equipo
+- Reparación simple: 1–2 horas
+- Diagnóstico: máximo 1 hora (si requiere más, crear otro ticket)
+- Instalación básica de split (condiciones normales, fácil acceso): aproximadamente 2 horas
+- Instalación compleja (altura, PH, ductos difíciles, tuberías largas, bombas de drenaje, trabajos eléctricos): puede requerir más tiempo o continuar otro día
+
+IMPORTANTE: 4 splits = aproximadamente 2–3 horas de trabajo total más traslados.
+NUNCA asumir duración mínima. NUNCA saturar agenda.
+
+## DATOS A ANALIZAR POR TRABAJO
+- Nombre del cliente, dirección, teléfono, zona
+- Tipo de trabajo: mantenimiento, reparación, instalación, revisión, garantía, reclamo, emergencia
+- Complejidad: dificultad técnica, necesidad de materiales/herramientas especiales, si requiere escalera, si requiere 2 técnicos, si requiere supervisión
+- Restricciones: horarios del PH, tráfico, clima, tiempo de traslado, disponibilidad del cliente/materiales/vehículos, experiencia del técnico
+
+## PRIORIZACIÓN
+1. Emergencias reales
+2. Reclamos activos
+3. Clientes importantes
+4. Equipos comerciales detenidos
+5. Instalaciones programadas
+6. Reparaciones
+7. Mantenimientos
+8. Revisiones o presupuestos
+
+## REGLAS PARA ARMAR RUTAS
+SIEMPRE: agrupar trabajos por zonas, minimizar cruces de ciudad, reducir tiempos de traslado, dejar margen entre trabajos, considerar tráfico y retrasos posibles, proteger instalaciones complejas.
+NUNCA: programar instalaciones difíciles al final del día, sobrecargar técnicos, asumir tiempos perfectos, ignorar restricciones del PH, llenar completamente la agenda sin margen, dejar técnicos nuevos solos en trabajos complejos.
+
+## TÉCNICOS
+- Luis: alta experiencia, buena supervisión, menor capacidad física. Ideal para diagnósticos y liderazgo técnico.
+- Julio: rápido en campo, fuerte operativamente, necesita seguimiento organizacional.
+- Técnicos nuevos: requieren apoyo, no deben manejar trabajos críticos solos.
+
+## DETECCIÓN DE RIESGOS
+Alertar si detectas: agenda saturada, tiempos irreales, demasiados traslados, falta de materiales, técnico sobrecargado, cliente conflictivo, trabajo mal definido, posible incumplimiento, reclamos repetidos, exceso de urgencias.
+
+## GESTIÓN DE TIEMPOS MUERTOS
+Si detectas huecos operativos sugerir: mantenimientos cercanos, compras pendientes, inspecciones, reorganización, apoyo entre cuadrillas.
+
+## MODO CONSULTA — estructura fija para Gustavo:
+⚡ **Acción inmediata** (qué hacer ahora, en orden)
+📋 **Orden de ruta sugerido** (con tiempos estimados y justificación de agrupación por zona)
+⚠️ **Riesgos detectados** (alertas operativas)
+💡 **Recomendación** (cómo mejorar o prevenir)
+
+## MODO PRÁCTICA:
+Presenta escenario realista con presión operativa. Tras la respuesta de Gustavo evalúa:
+✅ Lo que decidiste bien | 🔧 Qué mejorar | ⭐ Decisión ideal | 📚 Por qué
+
+## FORMA DE RESPONDER
+Respuestas cortas, claras, ejecutivas, fáciles de entender. Ayudar a Gustavo a tomar decisiones rápidas.
+
+Ejemplo de respuesta esperada:
+"Conviene mover el mantenimiento de Costa del Este para la tarde y agruparlo con el servicio de San Francisco para reducir traslados. La instalación del PH debe mantenerse en la mañana por restricciones horarias. Detecto riesgo de saturación en Julio si también toma la reparación de Obarrio."
+
+Responde en español. El objetivo final es construir una operación estable, organizada, profesional y capaz de crecer ordenadamente.`
   }
 };
 
 // ── Tracking ─────────────────────────────────────────────────────────────────
 const LS_KEY = "ra_events";
-function loadEvents() { try { const all = JSON.parse(localStorage.getItem(LS_KEY)||"[]"); const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-30); return all.filter(e => new Date(e.ts) >= cutoff); } catch { return []; } }
+function loadEvents() {
+  try {
+    const all = JSON.parse(localStorage.getItem(LS_KEY)||"[]");
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate()-30);
+    return all.filter(e => new Date(e.ts) >= cutoff);
+  } catch { return []; }
+}
 function saveEvent(ev) {
   try {
-    const events = loadEvents();
-    events.push({ ...ev, ts: new Date().toISOString() });
-    if (events.length > 1000) events.splice(0, events.length - 1000);
-    localStorage.setItem(LS_KEY, JSON.stringify(events));
+    const all = JSON.parse(localStorage.getItem(LS_KEY)||"[]");
+    all.push({ ...ev, ts: new Date().toISOString() });
+    if (all.length > 1000) all.splice(0, all.length - 1000);
+    localStorage.setItem(LS_KEY, JSON.stringify(all));
   } catch {}
 }
 // ────────────────────────────────────────────────────────────────────────────
@@ -93,32 +196,25 @@ const css = `
   .qbar::-webkit-scrollbar { height: 3px; }
 `;
 
-// ══════════════════════════════════════════════════════════════════════════════
-// COMPONENTE: Pantalla de login
-// ══════════════════════════════════════════════════════════════════════════════
 function LoginScreen({ onLogin }) {
   const [pass, setPass] = useState("");
   const [err, setErr]   = useState(false);
-
   const submit = () => {
     if (pass === PASS_APP)   { onLogin("app"); return; }
     if (pass === PASS_ADMIN) { onLogin("admin"); return; }
     setErr(true); setTimeout(() => setErr(false), 1500);
   };
-
   return (
     <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#e0f2fe,#f0f9ff,#ecfdf5)", display:"flex", alignItems:"center", justifyContent:"center", padding:16 }}>
       <style>{css}</style>
       <div style={{ background:"#fff", borderRadius:24, padding:"44px 40px", width:"100%", maxWidth:420, boxShadow:"0 24px 64px rgba(14,165,233,0.13)", textAlign:"center" }}>
         <div style={{ fontSize:48, marginBottom:16 }}>❄️</div>
-        <div style={{ fontSize:22, fontWeight:800, color:"#0c4a6e", marginBottom:6 }}>RefriAsist</div>
-        <div style={{ fontSize:13, color:"#64748b", marginBottom:32 }}>Asistente educativo · Refrigeración & AC</div>
-        <input
-          type="password" value={pass} onChange={e => setPass(e.target.value)}
+        <div style={{ fontSize:22, fontWeight:800, color:"#0c4a6e", marginBottom:6 }}>Buenos Aires Refrigeración</div>
+        <div style={{ fontSize:13, color:"#64748b", marginBottom:32 }}>Asistente interno de operaciones</div>
+        <input type="password" value={pass} onChange={e => setPass(e.target.value)}
           onKeyDown={e => e.key === "Enter" && submit()}
           placeholder="Contraseña de acceso"
-          style={{ width:"100%", padding:"12px 16px", borderRadius:12, border:`2px solid ${err?"#fca5a5":"#e2e8f0"}`, fontSize:15, marginBottom:12, outline:"none", transition:"border 0.2s" }}
-        />
+          style={{ width:"100%", padding:"12px 16px", borderRadius:12, border:`2px solid ${err?"#fca5a5":"#e2e8f0"}`, fontSize:15, marginBottom:12, outline:"none", transition:"border 0.2s" }}/>
         {err && <div style={{ color:"#dc2626", fontSize:13, marginBottom:10 }}>Contraseña incorrecta</div>}
         <button onClick={submit} style={{ width:"100%", padding:"12px", borderRadius:12, border:"none", background:KARLA_COLOR, color:"#fff", fontSize:15, fontWeight:700, cursor:"pointer" }}>
           Entrar
@@ -128,9 +224,6 @@ function LoginScreen({ onLogin }) {
   );
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// COMPONENTE: Burbujas de chat
-// ══════════════════════════════════════════════════════════════════════════════
 function TypingDots() {
   return (
     <span style={{ display:"flex", gap:4, alignItems:"center", height:18 }}>
@@ -159,14 +252,11 @@ function Bubble({ msg, agentKey }) {
   );
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// COMPONENTE: App principal (Karla y Gustavo)
-// ══════════════════════════════════════════════════════════════════════════════
 function MainApp() {
-  const [agent, setAgent]     = useState(null);
-  const [mode, setMode]       = useState("consulta");
+  const [agent, setAgent]   = useState(null);
+  const [mode, setMode]     = useState("consulta");
   const [messages, setMessages] = useState([]);
-  const [input, setInput]     = useState("");
+  const [input, setInput]   = useState("");
   const [loading, setLoading] = useState(false);
   const sessionId = useRef(null);
   const endRef    = useRef(null);
@@ -222,28 +312,28 @@ function MainApp() {
         <div style={{ display:"flex", alignItems:"center", gap:14, marginBottom:36 }}>
           <span style={{ fontSize:36 }}>❄️</span>
           <div>
-            <div style={{ fontSize:22, fontWeight:800, color:"#0c4a6e" }}>RefriAsist</div>
-            <div style={{ fontSize:12, color:"#38bdf8", fontWeight:600 }}>Asistente educativo · Refrigeración & Aire Acondicionado</div>
+            <div style={{ fontSize:22, fontWeight:800, color:"#0c4a6e" }}>Buenos Aires Refrigeración</div>
+            <div style={{ fontSize:12, color:"#38bdf8", fontWeight:600 }}>Asistente interno de operaciones</div>
           </div>
         </div>
         <h1 style={{ fontSize:26, fontWeight:800, color:"#0c4a6e", margin:"0 0 8px" }}>¿Quién está trabajando?</h1>
-        <p style={{ fontSize:13, color:"#64748b", marginBottom:24, lineHeight:1.5 }}>Selecciona tu perfil para acceder a tus guiones, casos de práctica y retroalimentación</p>
+        <p style={{ fontSize:13, color:"#64748b", marginBottom:24, lineHeight:1.5 }}>Selecciona tu perfil para acceder a tu asistente personalizado</p>
         <div style={{ display:"flex", flexDirection:"column", gap:12, marginBottom:24 }}>
           {Object.entries(AGENTS).map(([k,a]) => (
             <button key={k} onClick={() => selectAgent(k)} style={{ display:"flex", alignItems:"center", gap:16, padding:"18px 20px", background:"#f8fafc", border:`2px solid ${a.color}40`, borderRadius:18, cursor:"pointer", textAlign:"left", width:"100%" }}>
               <div style={{ width:50, height:50, borderRadius:14, background:a.color, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0 }}>{a.emoji}</div>
               <div style={{ flex:1 }}>
                 <div style={{ fontSize:16, fontWeight:700, color:"#0f172a" }}>{a.name}</div>
-                <div style={{ fontSize:12, color:"#64748b", marginBottom:5 }}>{a.role.split(" · ")[0]}</div>
-                <div style={{ fontSize:11, fontWeight:600, padding:"3px 10px", borderRadius:20, display:"inline-block", color:a.color, background:a.color+"18" }}>Consulta · Práctica · Retroalimentación</div>
+                <div style={{ fontSize:12, color:"#64748b", marginBottom:5 }}>{a.role}</div>
+                <div style={{ fontSize:11, fontWeight:600, padding:"3px 10px", borderRadius:20, display:"inline-block", color:a.color, background:a.color+"18" }}>Consulta · Práctica</div>
               </div>
               <span style={{ fontSize:26, fontWeight:700, color:a.color }}>›</span>
             </button>
           ))}
         </div>
         <div style={{ background:"#f0f9ff", border:"1px solid #bae6fd", borderRadius:14, padding:"13px 16px", fontSize:13, color:"#0369a1", display:"flex", gap:10, alignItems:"flex-start", lineHeight:1.55 }}>
-          <span style={{ fontSize:16, flexShrink:0 }}>🎓</span>
-          <span>Aprende <strong>qué decir, cómo decirlo con calidez</strong> y por qué funciona — con casos reales</span>
+          <span style={{ fontSize:16, flexShrink:0 }}>💡</span>
+          <span>Asistente interno de operaciones — <strong>confidencial</strong></span>
         </div>
       </div>
     </div>
@@ -255,7 +345,6 @@ function MainApp() {
     <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#e0f2fe,#f0f9ff,#ecfdf5)", display:"flex", alignItems:"center", justifyContent:"center", padding:16 }}>
       <style>{css}</style>
       <div style={{ background:"#fff", borderRadius:24, width:"100%", maxWidth:740, height:"91vh", maxHeight:820, display:"flex", flexDirection:"column", boxShadow:"0 24px 64px rgba(14,165,233,0.14)", overflow:"hidden" }}>
-        {/* Header */}
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"13px 18px", borderBottom:`2px solid ${ag.color}40`, background:"#fff", flexShrink:0 }}>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
             <div style={{ width:40, height:40, borderRadius:12, background:ag.color, display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0 }}>{ag.emoji}</div>
@@ -275,13 +364,9 @@ function MainApp() {
             </button>
           </div>
         </div>
-
-        {/* Banner */}
         <div style={{ padding:"7px 18px", fontSize:12, fontWeight:600, flexShrink:0, background:mode==="consulta"?"#f0f9ff":"#f0fdf4", color:mode==="consulta"?"#0369a1":"#166534", borderBottom:mode==="consulta"?"1px solid #bae6fd":"1px solid #bbf7d0" }}>
           {mode==="consulta"?ag.bC:ag.bP}
         </div>
-
-        {/* Mensajes */}
         <div style={{ flex:1, overflowY:"auto", padding:"16px 16px 8px", display:"flex", flexDirection:"column" }}>
           {messages.map((m,i) => <Bubble key={i} msg={m} agentKey={agent}/>)}
           {loading && (
@@ -292,21 +377,17 @@ function MainApp() {
           )}
           <div ref={endRef}/>
         </div>
-
-        {/* Quick prompts */}
         <div className="qbar" style={{ display:"flex", gap:7, padding:"8px 14px", overflowX:"auto", borderTop:"1px solid #f1f5f9", flexWrap:"wrap", flexShrink:0 }}>
           {prompts.map(q => <button key={q} onClick={() => send(q,true)} style={{ padding:"5px 12px", borderRadius:20, border:`1.5px solid ${ag.color}55`, background:"#fff", fontSize:11, fontWeight:600, cursor:"pointer", whiteSpace:"nowrap", flexShrink:0, color:ag.color }}>{q}</button>)}
-          <button onClick={() => { setInput("¿Cómo lo hice? Le respondí al cliente: "); inputRef.current?.focus(); }} style={{ padding:"5px 12px", borderRadius:20, border:"1.5px solid #f59e0b", background:"#fffbeb", fontSize:11, fontWeight:600, cursor:"pointer", whiteSpace:"nowrap", flexShrink:0, color:"#b45309" }}>
+          <button onClick={() => { setInput("¿Cómo lo hice? Respondí así: "); inputRef.current?.focus(); }} style={{ padding:"5px 12px", borderRadius:20, border:"1.5px solid #f59e0b", background:"#fffbeb", fontSize:11, fontWeight:600, cursor:"pointer", whiteSpace:"nowrap", flexShrink:0, color:"#b45309" }}>
             📝 ¿Cómo lo hice?
           </button>
         </div>
-
-        {/* Input */}
         <div style={{ display:"flex", gap:8, padding:"10px 14px 14px", alignItems:"flex-end", background:"#fff", flexShrink:0 }}>
           <textarea ref={inputRef} rows={2} value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); send(); }}}
-            placeholder={agent==="karla"?"Ej: El cliente dice que el equipo hace un ruido extraño...":"Ej: Tengo 4 servicios hoy en zonas distintas..."}
+            placeholder={agent==="karla"?"Ej: Un cliente pregunta el precio de instalación de dos splits...":"Ej: Tengo 3 mantenimientos y una instalación hoy en zonas distintas..."}
             style={{ flex:1, padding:"10px 13px", border:"2px solid #e2e8f0", borderRadius:13, fontSize:13, resize:"none", fontFamily:"inherit", lineHeight:1.5, color:"#0f172a", background:"#f8fafc" }}/>
           <button onClick={() => send()} disabled={!input.trim()||loading}
             style={{ width:42, height:42, borderRadius:12, border:"none", color:"#fff", fontSize:18, fontWeight:800, flexShrink:0, background:input.trim()&&!loading?ag.color:"#cbd5e1", cursor:input.trim()&&!loading?"pointer":"not-allowed" }}>↑</button>
@@ -316,9 +397,6 @@ function MainApp() {
   );
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// COMPONENTE: Panel Admin
-// ══════════════════════════════════════════════════════════════════════════════
 function fmtDate(ts) { return ts ? new Date(ts).toLocaleString("es-PA", { day:"2-digit", month:"short", hour:"2-digit", minute:"2-digit" }) : "—"; }
 function fmtDay(ts)  { return ts ? new Date(ts).toLocaleDateString("es-PA", { weekday:"short", day:"2-digit", month:"short" }) : "—"; }
 
@@ -389,13 +467,12 @@ function AdminPanel() {
     <div style={{ minHeight:"100vh", background:"#f8fafc", padding:20, fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
       <style>{css}</style>
       <div style={{ maxWidth:800, margin:"0 auto" }}>
-        {/* Header */}
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:24 }}>
           <div style={{ display:"flex", alignItems:"center", gap:12 }}>
             <div style={{ width:44, height:44, borderRadius:12, background:"linear-gradient(135deg,#0ea5e9,#0369a1)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:20 }}>📊</div>
             <div>
-              <div style={{ fontSize:20, fontWeight:800, color:"#0c4a6e" }}>RefriAsist Admin</div>
-              <div style={{ fontSize:12, color:"#64748b" }}>Panel de uso · Solo visible para ti</div>
+              <div style={{ fontSize:20, fontWeight:800, color:"#0c4a6e" }}>Panel Admin — Buenos Aires Refrigeración</div>
+              <div style={{ fontSize:12, color:"#64748b" }}>Reporte de uso últimos 30 días · Solo visible para ti</div>
             </div>
           </div>
           <button onClick={clearData} style={{ padding:"8px 14px", borderRadius:10, border:"1.5px solid #fecaca", background:"#fff", fontSize:12, fontWeight:600, cursor:"pointer", color:"#dc2626" }}>🗑 Borrar datos</button>
@@ -409,23 +486,18 @@ function AdminPanel() {
           </div>
         ) : (
           <>
-            {/* Filtro */}
             <div style={{ display:"flex", gap:8, marginBottom:20 }}>
               {[["todos","👥 Todos"],["karla","🎧 Karla"],["gustavo","🗺️ Gustavo"]].map(([v,l])=>(
                 <button key={v} onClick={()=>setFilter(v)} style={{ padding:"7px 16px", borderRadius:20, fontSize:12, fontWeight:600, cursor:"pointer", border:"1.5px solid", borderColor:filter===v?"transparent":"#e2e8f0", background:filter===v?(v==="karla"?KARLA_COLOR:v==="gustavo"?GUSTAVO_COLOR:"#0f172a"):"#fff", color:filter===v?"#fff":"#64748b" }}>{l}</button>
               ))}
             </div>
-
-            {/* Stats */}
             <div style={{ display:"flex", gap:12, marginBottom:20, flexWrap:"wrap" }}>
               <StatCard label="Sesiones totales" value={sessions.length} color="#0f172a" sub={`Karla ${karlaS.length} · Gustavo ${gustavoS.length}`}/>
               <StatCard label="Mensajes Karla" value={karlaM.length} color={KARLA_COLOR} sub={`${karlaC} consulta · ${karlaP} práctica`}/>
               <StatCard label="Mensajes Gustavo" value={gustavoM.length} color={GUSTAVO_COLOR} sub={`${gustavoC} consulta · ${gustavoP} práctica`}/>
               <StatCard label="Modo favorito" value={totalC>=totalP?"💬":"🎯"} color="#7c3aed" sub={`Consulta ${totalC} · Práctica ${totalP}`}/>
             </div>
-
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:16 }}>
-              {/* Consulta vs Práctica */}
               <div style={{ background:"#fff", border:"1px solid #e2e8f0", borderRadius:16, padding:18 }}>
                 <div style={{ fontSize:13, fontWeight:700, color:"#0f172a", marginBottom:14 }}>💬 Consulta vs 🎯 Práctica</div>
                 <div style={{ marginBottom:14 }}>
@@ -439,8 +511,6 @@ function AdminPanel() {
                   <Bar label="Práctica" count={gustavoP} max={gustavoM.length||1} color="#7dd3fc"/>
                 </div>
               </div>
-
-              {/* Temas */}
               <div style={{ background:"#fff", border:"1px solid #e2e8f0", borderRadius:16, padding:18 }}>
                 <div style={{ fontSize:13, fontWeight:700, color:"#0f172a", marginBottom:14 }}>🔥 Temas más consultados</div>
                 {topTopics.length === 0
@@ -449,11 +519,9 @@ function AdminPanel() {
                 }
               </div>
             </div>
-
-            {/* Actividad por día */}
             {dayKeys.length > 0 && (
               <div style={{ background:"#fff", border:"1px solid #e2e8f0", borderRadius:16, padding:18, marginBottom:16 }}>
-                <div style={{ fontSize:13, fontWeight:700, color:"#0f172a", marginBottom:14 }}>📅 Sesiones por día</div>
+                <div style={{ fontSize:13, fontWeight:700, color:"#0f172a", marginBottom:14 }}>📅 Sesiones por día (últimos 7 días)</div>
                 <div style={{ display:"flex", gap:8, alignItems:"flex-end", height:80 }}>
                   {dayKeys.map(day => {
                     const d = dayMap[day];
@@ -478,8 +546,6 @@ function AdminPanel() {
                 </div>
               </div>
             )}
-
-            {/* Sesiones recientes */}
             <div style={{ background:"#fff", border:"1px solid #e2e8f0", borderRadius:16, padding:18 }}>
               <div style={{ fontSize:13, fontWeight:700, color:"#0f172a", marginBottom:14 }}>🕐 Sesiones recientes</div>
               {[...sessions].reverse().slice(0,10).map((s,i,arr) => {
@@ -497,8 +563,7 @@ function AdminPanel() {
                 );
               })}
             </div>
-
-            <div style={{ textAlign:"center", marginTop:14, fontSize:11, color:"#cbd5e1" }}>{all.length} eventos · Solo visible para ti</div>
+            <div style={{ textAlign:"center", marginTop:14, fontSize:11, color:"#cbd5e1" }}>{all.length} eventos · Últimos 30 días · Solo visible para ti</div>
           </>
         )}
       </div>
@@ -506,12 +571,8 @@ function AdminPanel() {
   );
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// RAÍZ DE LA APP
-// ══════════════════════════════════════════════════════════════════════════════
 export default function App() {
-  const [auth, setAuth] = useState(null); // null | "app" | "admin"
-
+  const [auth, setAuth] = useState(null);
   if (!auth) return <LoginScreen onLogin={setAuth}/>;
   if (auth === "admin") return <AdminPanel/>;
   return <MainApp/>;
